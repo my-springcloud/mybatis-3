@@ -19,5 +19,10 @@ package org.apache.ibatis.mapping;
  * @author Clinton Begin
  */
 public enum ParameterMode {
-  IN, OUT, INOUT
+  /** 入参 */
+  IN,
+  /** 出参 */
+  OUT,
+  /** 入参+出差 */
+  INOUT
 }

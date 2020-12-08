@@ -21,6 +21,9 @@ import org.apache.ibatis.logging.LogFactory;
 
 /**
  * @author Clinton Begin
+ * {
+ *   在获取缓存的时候，打印出缓存命中次数
+ * }
  */
 public class LoggingCache implements Cache {
 

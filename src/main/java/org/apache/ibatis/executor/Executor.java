@@ -62,6 +62,10 @@ public interface Executor {
 
   boolean isClosed();
 
+  /**
+   * 设置该实例的装饰者实例
+   * @param executor
+   */
   void setExecutorWrapper(Executor executor);
 
 }

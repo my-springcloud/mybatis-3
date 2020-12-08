@@ -24,11 +24,15 @@ import org.apache.ibatis.cache.Cache;
  * Lru (least recently used) cache decorator.
  *
  * @author Clinton Begin
+ * {
+ *   最近最少使用算法
+ * }
  */
 public class LruCache implements Cache {
 
   private final Cache delegate;
   private Map<Object, Object> keyMap;
+  /** 最久的key */
   private Object eldestKey;
 
   public LruCache(Cache delegate) {
@@ -54,6 +58,7 @@ public class LruCache implements Cache {
       protected boolean removeEldestEntry(Map.Entry<Object, Object> eldest) {
         boolean tooBig = size() > size;
         if (tooBig) {
+          // 最久的key
           eldestKey = eldest.getKey();
         }
         return tooBig;

@@ -30,6 +30,9 @@ import org.apache.ibatis.io.Resources;
 
 /**
  * @author Clinton Begin
+ * {
+ *   将Value序列号后再缓存
+ * }
  */
 public class SerializedCache implements Cache {
 

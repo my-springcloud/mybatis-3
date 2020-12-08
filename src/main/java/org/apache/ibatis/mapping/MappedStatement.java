@@ -30,6 +30,9 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ * {
+ *   映射的SQL语句
+ * }
  */
 public final class MappedStatement {
 
@@ -44,6 +47,7 @@ public final class MappedStatement {
   private Cache cache;
   private ParameterMap parameterMap;
   private List<ResultMap> resultMaps;
+  /** 清空缓存 */
   private boolean flushCacheRequired;
   private boolean useCache;
   private boolean resultOrdered;

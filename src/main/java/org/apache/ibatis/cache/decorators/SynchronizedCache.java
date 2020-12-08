@@ -19,6 +19,9 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * @author Clinton Begin
+ * {
+ *   并发同步缓存器
+ * }
  */
 public class SynchronizedCache implements Cache {
 

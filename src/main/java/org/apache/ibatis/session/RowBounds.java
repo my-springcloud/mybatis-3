@@ -17,6 +17,9 @@ package org.apache.ibatis.session;
 
 /**
  * @author Clinton Begin
+ * {
+ *   设置行偏移量和行数
+ * }
  */
 public class RowBounds {
 

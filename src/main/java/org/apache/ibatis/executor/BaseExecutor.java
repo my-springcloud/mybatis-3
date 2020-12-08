@@ -50,21 +50,25 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 public abstract class BaseExecutor implements Executor {
 
   private static final Log log = LogFactory.getLog(BaseExecutor.class);
-
+  /** 事务管理 */
   protected Transaction transaction;
+  /** 执行器包装器 */
   protected Executor wrapper;
-
+  /** 并发队列，延迟加载 */
   protected ConcurrentLinkedQueue<DeferredLoad> deferredLoads;
+  /** 缓存： 将SQL执行结果缓存，key为SQL语句+参数 */
   protected PerpetualCache localCache;
+  /** 缓存： 存储过程out参数输出值缓存，key为SQL语句+参数 */
   protected PerpetualCache localOutputParameterCache;
   protected Configuration configuration;
-
+  /** 查询栈 */
   protected int queryStack;
   private boolean closed;
 
   protected BaseExecutor(Configuration configuration, Transaction transaction) {
     this.transaction = transaction;
     this.deferredLoads = new ConcurrentLinkedQueue<>();
+    // 初始化缓存
     this.localCache = new PerpetualCache("LocalCache");
     this.localOutputParameterCache = new PerpetualCache("LocalOutputParameterCache");
     this.closed = false;
@@ -144,6 +148,7 @@ public abstract class BaseExecutor implements Executor {
       throw new ExecutorException("Executor was closed.");
     }
     if (queryStack == 0 && ms.isFlushCacheRequired()) {
+      // 每次查询都走DB，将<select>标签中的flushCache属性设置为true即可
       clearLocalCache();
     }
     List<E> list;
@@ -159,11 +164,13 @@ public abstract class BaseExecutor implements Executor {
       queryStack--;
     }
     if (queryStack == 0) {
+      // 加载所有延时加载的数据
       for (DeferredLoad deferredLoad : deferredLoads) {
         deferredLoad.load();
       }
       // issue #601
       deferredLoads.clear();
+      // 如果是二级缓存
       if (configuration.getLocalCacheScope() == LocalCacheScope.STATEMENT) {
         // issue #482
         clearLocalCache();
@@ -303,14 +310,20 @@ public abstract class BaseExecutor implements Executor {
 
   private void handleLocallyCachedOutputParameters(MappedStatement ms, CacheKey key, Object parameter, BoundSql boundSql) {
     if (ms.getStatementType() == StatementType.CALLABLE) {
+
       final Object cachedParameter = localOutputParameterCache.getObject(key);
+
       if (cachedParameter != null && parameter != null) {
+
         final MetaObject metaCachedParameter = configuration.newMetaObject(cachedParameter);
         final MetaObject metaParameter = configuration.newMetaObject(parameter);
+
         for (ParameterMapping parameterMapping : boundSql.getParameterMappings()) {
+          /* 针对存储过程OUT参数 */
           if (parameterMapping.getMode() != ParameterMode.IN) {
             final String parameterName = parameterMapping.getProperty();
             final Object cachedValue = metaCachedParameter.getValue(parameterName);
+            /* 给 parameter 设置值 */
             metaParameter.setValue(parameterName, cachedValue);
           }
         }
@@ -328,6 +341,7 @@ public abstract class BaseExecutor implements Executor {
     }
     localCache.putObject(key, list);
     if (ms.getStatementType() == StatementType.CALLABLE) {
+      // 存储过程out参数输出值缓存
       localOutputParameterCache.putObject(key, parameter);
     }
     return list;

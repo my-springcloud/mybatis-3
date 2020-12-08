@@ -34,6 +34,11 @@ import org.apache.ibatis.logging.LogFactory;
  *
  * @author Clinton Begin
  * @author Eduardo Macarron
+ * {
+ *   二级缓存事务性缓冲区。
+ *   这个类会保存一个Session中，添加到二级缓存中的所有key-value. 只有在事务提交的时候，才会将所有的key-value提交到缓存。如果事务回滚的化，则丢弃所有的key-value。
+ *   已添加阻塞缓存支持。 因此，get（）未命中时，也会调用put（）放入缓存，以便可以释放与该键关联的任何锁。
+ * }
  */
 public class TransactionalCache implements Cache {
 
@@ -41,7 +46,9 @@ public class TransactionalCache implements Cache {
 
   private final Cache delegate;
   private boolean clearOnCommit;
+  /** 需要被添加到缓存中的key-value */
   private final Map<Object, Object> entriesToAddOnCommit;
+  /** 在缓存中不存在的条目 */
   private final Set<Object> entriesMissedInCache;
 
   public TransactionalCache(Cache delegate) {
@@ -66,6 +73,7 @@ public class TransactionalCache implements Cache {
     // issue #116
     Object object = delegate.getObject(key);
     if (object == null) {
+      // 任何缓存不命中，都会被添加
       entriesMissedInCache.add(key);
     }
     // issue #146
@@ -78,6 +86,7 @@ public class TransactionalCache implements Cache {
 
   @Override
   public void putObject(Object key, Object object) {
+    // 放入缓冲区
     entriesToAddOnCommit.put(key, object);
   }
 
@@ -113,10 +122,12 @@ public class TransactionalCache implements Cache {
 
   private void flushPendingEntries() {
     for (Map.Entry<Object, Object> entry : entriesToAddOnCommit.entrySet()) {
+      // 将所有的 key-value存入缓冲区
       delegate.putObject(entry.getKey(), entry.getValue());
     }
     for (Object entry : entriesMissedInCache) {
       if (!entriesToAddOnCommit.containsKey(entry)) {
+        // 缓存未命中的也存入缓冲区
         delegate.putObject(entry, null);
       }
     }
@@ -125,6 +136,7 @@ public class TransactionalCache implements Cache {
   private void unlockMissedEntries() {
     for (Object entry : entriesMissedInCache) {
       try {
+        // 移除所有未命中的缓存
         delegate.removeObject(entry);
       } catch (Exception e) {
         log.warn("Unexpected exception while notifiying a rollback to the cache adapter. "

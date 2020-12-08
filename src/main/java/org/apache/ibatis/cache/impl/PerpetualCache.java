@@ -23,9 +23,10 @@ import org.apache.ibatis.cache.CacheException;
 
 /**
  * @author Clinton Begin
+ * 永久缓存，没有过期机制，过期机制有各种装饰器增强
  */
 public class PerpetualCache implements Cache {
-
+  /** 缓存key，约定：命名空间id 作为缓存key */
   private final String id;
 
   private final Map<Object, Object> cache = new HashMap<>();

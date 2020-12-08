@@ -21,11 +21,16 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * @author Clinton Begin
+ * {
+ *   定时清空缓存
+ * }
  */
 public class ScheduledCache implements Cache {
 
   private final Cache delegate;
+  /** 清理清空间隔 */
   protected long clearInterval;
+  /** 上次清空时间 */
   protected long lastClear;
 
   public ScheduledCache(Cache delegate) {

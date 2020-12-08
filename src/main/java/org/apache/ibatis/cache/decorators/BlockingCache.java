@@ -31,12 +31,15 @@ import org.apache.ibatis.cache.CacheException;
  * This way, other threads will wait until this element is filled instead of hitting the database.
  *
  * @author Eduardo Macarron
- *
+ * {
+ *   当缓存中找不到元素时，会导致线程阻塞，直到缓存中被填入该值
+ * }
  */
 public class BlockingCache implements Cache {
-
+  /** 等待超时时间 */
   private long timeout;
   private final Cache delegate;
+  /** 保存所有的 */
   private final ConcurrentHashMap<Object, ReentrantLock> locks;
 
   public BlockingCache(Cache delegate) {

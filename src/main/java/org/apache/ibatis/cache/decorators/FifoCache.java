@@ -28,6 +28,7 @@ import org.apache.ibatis.cache.Cache;
 public class FifoCache implements Cache {
 
   private final Cache delegate;
+  /** delegate 的所有key，用来实现先进先出的逻辑 */
   private final Deque<Object> keyList;
   private int size;
 
@@ -73,10 +74,15 @@ public class FifoCache implements Cache {
     keyList.clear();
   }
 
+  /**
+   * 实现先进先出的逻辑
+   * @param key
+   */
   private void cycleKeyList(Object key) {
     keyList.addLast(key);
     if (keyList.size() > size) {
       Object oldestKey = keyList.removeFirst();
+      // 缓存退出
       delegate.removeObject(oldestKey);
     }
   }

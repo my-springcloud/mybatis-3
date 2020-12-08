@@ -24,6 +24,7 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ * 在JavaType 和 JdbcType 之间进行转换
  */
 public class ParameterMapping {
 

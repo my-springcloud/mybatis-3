@@ -41,12 +41,15 @@ public class CacheKey implements Cloneable, Serializable {
       throw new CacheException("Not allowed to update a null cache key instance.");
     }
   };
-
+  /** 默认校验和 */
   private static final int DEFAULT_MULTIPLIER = 37;
+  /** 默认hashcode */
   private static final int DEFAULT_HASHCODE = 17;
-
+  /** 乘数 */
   private final int multiplier;
+  /** multiplier * hashcode + baseHashCode */
   private int hashcode;
+  /** 校验和，updateList中所有对象的hashcode求和 */
   private long checksum;
   private int count;
   // 8/21/2017 - Sonarlint flags this as needing to be marked transient. While true if content is not serializable, this

@@ -35,12 +35,14 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 public class SqlSessionManager implements SqlSessionFactory, SqlSession {
 
   private final SqlSessionFactory sqlSessionFactory;
+  // 所有的操作调用的都是这个代理对象，而这个代理对象又将操作委派给了 localSqlSession 种的sqlSession
   private final SqlSession sqlSessionProxy;
 
   private final ThreadLocal<SqlSession> localSqlSession = new ThreadLocal<>();
 
   private SqlSessionManager(SqlSessionFactory sqlSessionFactory) {
     this.sqlSessionFactory = sqlSessionFactory;
+    // 委派给了 localSqlSession里面的sqlSession 执行
     this.sqlSessionProxy = (SqlSession) Proxy.newProxyInstance(
         SqlSessionFactory.class.getClassLoader(),
         new Class[]{SqlSession.class},
@@ -337,13 +339,14 @@ public class SqlSessionManager implements SqlSessionFactory, SqlSession {
     }
   }
 
-  private class SqlSessionInterceptor implements InvocationHandler {
+    private class SqlSessionInterceptor implements InvocationHandler {
     public SqlSessionInterceptor() {
         // Prevent Synthetic Access
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+      // 委派给了 ThreadLocal 种的sqlSession执行
       final SqlSession sqlSession = SqlSessionManager.this.localSqlSession.get();
       if (sqlSession != null) {
         try {

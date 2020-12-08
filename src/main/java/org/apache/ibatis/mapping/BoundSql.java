@@ -32,12 +32,18 @@ import org.apache.ibatis.session.Configuration;
  * Can also have additional parameters that are created by the dynamic language (for loops, bind...).
  *
  * @author Clinton Begin
+ * {
+ *   SqlSource 处理所有动态内容后得到的最终的SQL字符串。这个SQL可以有“？”占位符。
+ * }
  */
 public class BoundSql {
 
+  /** 最终的SQL字符串。这个SQL可以有“？”占位符。 */
   private final String sql;
+  /**  */
   private final List<ParameterMapping> parameterMappings;
   private final Object parameterObject;
+  /** created by the dynamic language (for loops, bind...) */
   private final Map<String, Object> additionalParameters;
   private final MetaObject metaParameters;
 
